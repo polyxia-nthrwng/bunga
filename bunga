@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinite Rose Garden Animation</title>
+    <style>
+        :root {
+            --bg-primary: #0a0a1a;
+            --bg-secondary: #1a1a2e;
+            --bg-accent: #2a2a3e;
+            --flower-stem: #1a4a2a;
+            --flower-stem-highlight: #2d7a4d;
+            --flower-leaf: #2a5a3a;
+            --flower-leaf-highlight: #3d8a5d;
+            --flower-leaf-vein: #1a3a2a;
+            --flower-center-outer: #ffd700;
+            --flower-center-mid: #ffea00;
+            --flower-center-inner: #fff200;
+            --flower-stamen: #8b4513;
+            --star-color: #ffffff;
+            --branch-color: #3a5a4a;
+            --branch-highlight: #4a6a5a;
+            
+            /* Color variations for flowers */
+            --red-base: #8b0000;
+            --red-mid: #dc143c;
+            --red-tip: #ff6b6b;
+            --red-glow: #ff4757;
+            
+            --blue-base: #191970;
+            --blue-mid: #4169e1;
+            --blue-tip: #87ceeb;
+            --blue-glow: #74b9ff;
+            
+            --yellow-base: #ffd700;
+            --yellow-mid: #ffff00;
+            --yellow-tip: #fffacd;
+            --yellow-glow: #fdcb6e;
+            
+            --white-base: #f8f8ff;
+            --white-mid: #ffffff;
+            --white-tip: #fffafa;
+            --white-glow: #ddd;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(ellipse at center, var(--bg-accent) 0%, var(--bg-secondary) 50%, var(--bg-primary) 100%);
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            position: relative;
+        }
+
+        /* Enhanced starfield */
+        .starfield {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            background: var(--star-color);
+            border-radius: 50%;
+            animation: twinkle 4s infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.1;
+                transform: scale(0.3);
+                box-shadow: 0 0 2px var(--star-color);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1);
+                box-shadow: 0 0 10px var(--star-color);
+            }
+        }
+
+        /* Floating particles */
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--flower-petal-glow);
+            border-radius: 50%;
+            animation: floatParticle 6s infinite ease-in-out;
+            box-shadow: 0 0 4px var(--flower-petal-glow);
+        }
+
+        @keyframes floatParticle {
+            0%, 100% {
+                opacity: 0;
+                transform: translateY(0) scale(0.5);
+            }
+            50% {
+                opacity: 1;
+                transform: translateY(-120px) scale(1.2);
+            }
+        }
+
+        /* Main garden container */
+        .garden {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            z-index: 2;
+        }
+
+        /* Branch system */
+        .branch {
+            position: absolute;
+            background: linear-gradient(to right, var(--branch-color), var(--branch-highlight));
+            border-radius: 10px;
+            transform-origin: left center;
+            opacity: 0;
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.1);
+        }
+
+        .branch::before {
+            content: '';
+            position: absolute;
+            top: 1px;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--branch-highlight));
+            border-radius: 1px;
+        }
+
+        /* Main trunk */
+        .main-trunk {
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 20px;
+            animation: growBranch 2s ease-out forwards;
+        }
+
+        /* Branch growth animation */
+        @keyframes growBranch {
+            from {
+                width: 0;
+                opacity: 0;
+            }
+            to {
+                width: 200px;
+                opacity: 1;
+            }
+        }
+
+        /* Leaf */
+        .leaf {
+            position: absolute;
+            background: linear-gradient(45deg, var(--flower-leaf), var(--flower-leaf-highlight));
+            border-radius: 50px 10px;
+            transform-origin: bottom center;
+            opacity: 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .leaf::before {
+            content: '';
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 60%;
+            background: linear-gradient(to bottom, var(--flower-leaf-vein), transparent);
+            border-radius: 1px;
+        }
+
+        .leaf::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 80%;
+            background: linear-gradient(45deg, transparent, var(--flower-leaf-highlight));
+            border-radius: inherit;
+            opacity: 0.3;
+        }
+
+        /* Flower */
+        .flower {
+            position: absolute;
+            transform-origin: center center;
+            opacity: 0;
+        }
+
+        /* Flower center */
+        .flower-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, var(--flower-center-outer), var(--flower-center-mid));
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+            z-index: 10;
+        }
+
+        /* Petal */
+        .petal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 25px;
+            height: 60px;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            transform-origin: center bottom;
+            opacity: 0;
+        }
+
+        .petal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: inherit;
+            opacity: 0.4;
+        }
+
+        /* Red flower */
+        .petal.red {
+            background: linear-gradient(to top, var(--red-base), var(--red-mid), var(--red-tip));
+            box-shadow: 0 0 20px var(--red-glow);
+        }
+        
+        .petal.red::before {
+            background: linear-gradient(to top, transparent, var(--red-tip));
+        }
+
+        /* Blue flower */
+        .petal.blue {
+            background: linear-gradient(to top, var(--blue-base), var(--blue-mid), var(--blue-tip));
+            box-shadow: 0 0 20px var(--blue-glow);
+        }
+        
+        .petal.blue::before {
+            background: linear-gradient(to top, transparent, var(--blue-tip));
+        }
+
+        /* Yellow flower */
+        .petal.yellow {
+            background: linear-gradient(to top, var(--yellow-base), var(--yellow-mid), var(--yellow-tip));
+            box-shadow: 0 0 20px var(--yellow-glow);
+        }
+        
+        .petal.yellow::before {
+            background: linear-gradient(to top, transparent, var(--yellow-tip));
+        }
+
+        /* White flower */
+        .petal.white {
+            background: linear-gradient(to top, var(--white-base), var(--white-mid), var(--white-tip));
+            box-shadow: 0 0 20px var(--white-glow);
+        }
+        
+        .petal.white::before {
+            background: linear-gradient(to top, transparent, var(--white-tip));
+        }
+
+        /* Glow effect for different colors */
+        .flower.red::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, var(--red-glow), transparent);
+            border-radius: 50%;
+            opacity: 0;
+            animation: glowFlower 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .flower.blue::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, var(--blue-glow), transparent);
+            border-radius: 50%;
+            opacity: 0;
+            animation: glowFlower 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .flower.yellow::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, var(--yellow-glow), transparent);
+            border-radius: 50%;
+            opacity: 0;
+            animation: glowFlower 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .flower.white::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, var(--white-glow), transparent);
+            border-radius: 50%;
+            opacity: 0;
+            animation: glowFlower 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes glowFlower {
+            0%, 100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            50% {
+                opacity: 0.3;
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+        }
+
+        /* Animation classes */
+        .grow-leaf {
+            animation: growLeaf 1s ease-out forwards;
+        }
+
+        .bloom-flower {
+            animation: bloomFlower 0.5s ease-out forwards;
+        }
+
+        .bloom-petal {
+            animation: bloomPetal 0.8s ease-out forwards;
+        }
+
+        .grow-branch {
+            animation: growBranch 1.5s ease-out forwards;
+        }
+
+        @keyframes growLeaf {
+            from {
+                opacity: 0;
+                transform: scale(0) rotate(var(--rotation, 0deg));
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) rotate(var(--rotation, 0deg));
+            }
+        }
+
+        @keyframes bloomFlower {
+            from {
+                opacity: 0;
+                transform: scale(0);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes bloomPetal {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) rotate(var(--rotation, 0deg)) translateY(-30px) scale(0);
+            }
+            50% {
+                opacity: 0.8;
+                transform: translate(-50%, -50%) rotate(var(--rotation, 0deg)) translateY(-30px) scale(1.2);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) rotate(var(--rotation, 0deg)) translateY(-30px) scale(1);
+            }
+        }
+
+        /* Restart button */
+        .restart-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            background: linear-gradient(45deg, var(--flower-petal-base), var(--flower-petal-tip));
+            border: none;
+            border-radius: 30px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(138, 43, 226, 0.4);
+            transition: all 0.3s ease;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(138, 43, 226, 0.6);
+        }
+
+        /* Loading animation */
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--flower-petal-glow);
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            opacity: 1;
+            animation: fadeOut 1s 2s ease-out forwards;
+            z-index: 100;
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .petal {
+                width: 20px;
+                height: 45px;
+            }
+            
+            .flower-center {
+                width: 15px;
+                height: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading text -->
+    <div class="loading">
+        🌹 Menumbuhkan taman mawar tanpa batas...
+    </div>
+
+    <!-- Starfield background -->
+    <div class="starfield" id="starfield"></div>
+
+    <!-- Floating particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Main garden container -->
+    <div class="garden" id="garden">
+        <!-- Dynamic content will be added here -->
+    </div>
+
+    <!-- Restart button -->
+    <button class="restart-btn" onclick="restartAnimation()">🌹 Mulai Ulang</button>
+
+    <script>
+        // Garden state
+        let gardenState = {
+            branches: [],
+            flowers: [],
+            leaves: [],
+            nextBranchId: 0,
+            nextFlowerId: 0,
+            nextLeafId: 0,
+            isGrowing: true
+        };
+
+        // Enhanced starfield
+        function createStarfield() {
+            const starfield = document.getElementById('starfield');
+            const numStars = 200;
+
+            for (let i = 0; i < numStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                
+                const size = Math.random() * 4 + 0.5;
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                
+                star.style.animationDelay = Math.random() * 4 + 's';
+                star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                
+                starfield.appendChild(star);
+            }
+        }
+
+        // Create floating particles
+        function createParticles() {
+            const particles = document.getElementById('particles');
+            const numParticles = 50;
+
+            for (let i = 0; i < numParticles; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                
+                particles.appendChild(particle);
+            }
+        }
+
+        // Create branch
+        function createBranch(startX, startY, angle, length, thickness, parentId = null) {
+            const garden = document.getElementById('garden');
+            const branch = document.createElement('div');
+            branch.className = 'branch';
+            branch.id = `branch-${gardenState.nextBranchId++}`;
+            
+            branch.style.left = startX + 'px';
+            branch.style.bottom = startY + 'px';
+            branch.style.width = '0px';
+            branch.style.height = thickness + 'px';
+            branch.style.transform = `rotate(${angle}deg)`;
+            branch.style.transformOrigin = 'left center';
+            
+            garden.appendChild(branch);
+            
+            // Animate branch growth
+            setTimeout(() => {
+                branch.style.width = length + 'px';
+                branch.style.opacity = '1';
+                branch.style.transition = 'width 1.5s ease-out, opacity 1.5s ease-out';
+            }, 100);
+            
+            const branchData = {
+                id: branch.id,
+                element: branch,
+                startX, startY, angle, length, thickness,
+                endX: startX + Math.cos(angle * Math.PI / 180) * length,
+                endY: startY + Math.sin(angle * Math.PI / 180) * length,
+                parentId
+            };
+            
+            gardenState.branches.push(branchData);
+            
+            // Schedule branch splitting
+            setTimeout(() => {
+                if (gardenState.isGrowing) {
+                    splitBranch(branchData);
+                }
+            }, 2000);
+            
+            return branchData;
+        }
+
+        // Split branch into multiple branches
+        function splitBranch(parentBranch) {
+            const numSplits = Math.random() > 0.5 ? 2 : 3;
+            const baseAngle = parentBranch.angle;
+            
+            for (let i = 0; i < numSplits; i++) {
+                const angleOffset = (i - (numSplits - 1) / 2) * 45;
+                const newAngle = baseAngle + angleOffset + (Math.random() - 0.5) * 30;
+                const newLength = parentBranch.length * (0.6 + Math.random() * 0.3);
+                const newThickness = Math.max(2, parentBranch.thickness * 0.8);
+                
+                const branch = createBranch(
+                    parentBranch.endX,
+                    parentBranch.endY,
+                    newAngle,
+                    newLength,
+                    newThickness,
+                    parentBranch.id
+                );
+                
+                // Add leaves to this branch
+                setTimeout(() => {
+                    if (gardenState.isGrowing) {
+                        addLeavesToBranch(branch);
+                    }
+                }, 500);
+                
+                // Add flower at branch end
+                setTimeout(() => {
+                    if (gardenState.isGrowing) {
+                        addFlowerToBranch(branch);
+                    }
+                }, 1000);
+            }
+        }
+
+        // Add leaves to branch
+        function addLeavesToBranch(branch) {
+            const numLeaves = Math.floor(Math.random() * 4) + 2;
+            
+            for (let i = 0; i < numLeaves; i++) {
+                const leafPos = 0.3 + (i / numLeaves) * 0.5;
+                const leafX = branch.startX + Math.cos(branch.angle * Math.PI / 180) * branch.length * leafPos;
+                const leafY = branch.startY + Math.sin(branch.angle * Math.PI / 180) * branch.length * leafPos;
+                
+                createLeaf(leafX, leafY, branch.angle + (Math.random() - 0.5) * 60);
+            }
+        }
+
+        // Create leaf
+        function createLeaf(x, y, angle) {
+            const garden = document.getElementById('garden');
+            const leaf = document.createElement('div');
+            leaf.className = 'leaf';
+            leaf.id = `leaf-${gardenState.nextLeafId++}`;
+            
+            const size = 15 + Math.random() * 15;
+            leaf.style.width = size + 'px';
+            leaf.style.height = size * 2 + 'px';
+            leaf.style.left = x + 'px';
+            leaf.style.bottom = y + 'px';
+            leaf.style.transform = `rotate(${angle}deg)`;
+            leaf.style.setProperty('--rotation', angle + 'deg');
+            
+            garden.appendChild(leaf);
+            
+            // Animate leaf growth
+            setTimeout(() => {
+                leaf.classList.add('grow-leaf');
+            }, Math.random() * 500);
+            
+            gardenState.leaves.push({
+                id: leaf.id,
+                element: leaf,
+                x, y, angle
+            });
+        }
+
+        // Add flower to branch
+        function addFlowerToBranch(branch) {
+            createFlower(branch.endX, branch.endY);
+        }
+
+        // Create flower with random color
+        function createFlower(x, y) {
+            const garden = document.getElementById('garden');
+            const flower = document.createElement('div');
+            flower.className = 'flower';
+            flower.id = `flower-${gardenState.nextFlowerId++}`;
+            
+            // Random color selection
+            const colors = ['red', 'blue', 'yellow', 'white'];
+            const selectedColor = colors[Math.floor(Math.random() * colors.length)];
+            flower.classList.add(selectedColor);
+            
+            flower.style.left = x + 'px';
+            flower.style.bottom = y + 'px';
+            flower.style.width = '80px';
+            flower.style.height = '80px';
+            
+            // Create flower center
+            const center = document.createElement('div');
+            center.className = 'flower-center';
+            flower.appendChild(center);
+            
+            // Create petals in perfect circle
+            const numPetals = 12;
+            for (let i = 0; i < numPetals; i++) {
+                const petal = document.createElement('div');
+                petal.className = `petal ${selectedColor}`;
+                petal.style.setProperty('--rotation', (360 / numPetals * i) + 'deg');
+                petal.style.transform = `translate(-50%, -50%) rotate(${360 / numPetals * i}deg) translateY(-30px) scale(0)`;
+                
+                flower.appendChild(petal);
+                
+                // Animate petal bloom with staggered timing
+                setTimeout(() => {
+                    petal.classList.add('bloom-petal');
+                }, i * 100);
+            }
+            
+            garden.appendChild(flower);
+            
+            // Animate flower appearance
+            setTimeout(() => {
+                flower.classList.add('bloom-flower');
+            }, 200);
+            
+            gardenState.flowers.push({
+                id: flower.id,
+                element: flower,
+                x, y
+            });
+        }
+
+        // Initialize garden
+        function initializeGarden() {
+            const garden = document.getElementById('garden');
+            garden.innerHTML = '';
+            
+            // Reset state
+            gardenState = {
+                branches: [],
+                flowers: [],
+                leaves: [],
+                nextBranchId: 0,
+                nextFlowerId: 0,
+                nextLeafId: 0,
+                isGrowing: true
+            };
+            
+            // Create initial trunk
+            const centerX = window.innerWidth / 2;
+            const centerY = 50;
+            
+            // Create multiple initial branches - shorter
+            const numInitialBranches = 3;
+            for (let i = 0; i < numInitialBranches; i++) {
+                const angle = 45 + (i * 30) + (Math.random() - 0.5) * 20;
+                const length = 80 + Math.random() * 30; // Shorter branches
+                const thickness = 8 + Math.random() * 4;
+                
+                setTimeout(() => {
+                    createBranch(centerX, centerY, angle, length, thickness);
+                }, i * 800);
+            }
+            
+            // Continue growing indefinitely
+            setTimeout(() => {
+                if (gardenState.isGrowing) {
+                    continueGrowth();
+                }
+            }, 5000);
+        }
+
+        // Continue infinite growth
+        function continueGrowth() {
+            if (!gardenState.isGrowing) return;
+            
+            // Randomly select existing branches to continue growing
+            const availableBranches = gardenState.branches.filter(branch => 
+                Math.random() > 0.7 && // Random selection
+                branch.thickness > 3 // Only grow from thicker branches
+            );
+            
+            if (availableBranches.length > 0) {
+                const branch = availableBranches[Math.floor(Math.random() * availableBranches.length)];
+                
+                // Create new growth from this branch
+                setTimeout(() => {
+                    if (gardenState.isGrowing) {
+                        splitBranch(branch);
+                    }
+                }, 100);
+            }
+            
+            // Also create new random branches from ground level occasionally - shorter
+            if (Math.random() > 0.8) {
+                const randomX = Math.random() * window.innerWidth;
+                const randomAngle = 30 + Math.random() * 120;
+                const randomLength = 60 + Math.random() * 40; // Shorter random branches
+                
+                setTimeout(() => {
+                    if (gardenState.isGrowing) {
+                        createBranch(randomX, 20, randomAngle, randomLength, 6);
+                    }
+                }, 500);
+            }
+            
+            // Schedule next growth cycle
+            setTimeout(() => {
+                if (gardenState.isGrowing) {
+                    continueGrowth();
+                }
+            }, 2000 + Math.random() * 3000);
+        }
+
+        // Restart animation
+        function restartAnimation() {
+            gardenState.isGrowing = false;
+            
+            // Clear particles
+            const particles = document.getElementById('particles');
+            particles.innerHTML = '';
+            
+            // Recreate everything
+            setTimeout(() => {
+                createStarfield();
+                createParticles();
+                initializeGarden();
+                
+                // Show loading message
+                const loading = document.querySelector('.loading');
+                if (loading) {
+                    loading.style.opacity = '1';
+                    loading.style.visibility = 'visible';
+                    loading.style.animation = 'fadeOut 1s 2s ease-out forwards';
+                }
+            }, 100);
+        }
+
+        // Initialize everything
+        function initialize() {
+            createStarfield();
+            createParticles();
+            initializeGarden();
+        }
+
+        // Start when page loads
+        window.addEventListener('load', initialize);
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            // Recreate starfield and particles for new dimensions
+            const starfield = document.getElementById('starfield');
+            const particles = document.getElementById('particles');
+            starfield.innerHTML = '';
+            particles.innerHTML = '';
+            createStarfield();
+            createParticles();
+        });
+    </script>
+</body>
+</html>
